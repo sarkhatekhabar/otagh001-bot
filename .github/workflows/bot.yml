@@ -3,9 +3,6 @@ name: Otagh 001 Bot
 on:
   workflow_dispatch:
 
-  schedule:
-    - cron: "*/5 * * * *"
-
 permissions:
   contents: read
 
@@ -29,7 +26,12 @@ jobs:
       - name: Run Telegram bot
         env:
           TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        run: python bot.py
-
-
-
+        run: |
+          set +e
+          timeout 240s python -u bot.py
+          result=$?
+          if [ "$result" -eq 124 ]; then
+            echo "Test period finished."
+            exit 0
+          fi
+          exit "$result"
